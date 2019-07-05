@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Charts</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <form class="form">
+      <div class="form-fields">
+        <select class="form-control" name="chartLib" id="colors-input">
+          <option value="ChartJS">ChartJS</option>
+          <option value="HiCharts">HiCharts</option>
+        </select>
+      </div>
+      <div class="form-fields">
+        <select class="form-control" name="district" id="district-input">
+        </select>
+      </div>
+      <div class="form-fields">
+        <!-- <label for="chart-type-input">Email address</label> -->
+        <select class="form-control" name="chart" id="chart-type-input">
+          <option value="bar">Bar</option>
+          <option value="pie">Pie</option>
+          <option value="line">Line</option>
+          <option value="bubble">Bubble</option>
+        </select>
+      </div>
+      <div class="form-fields">
+        <!-- <label for="filters-input">Greater Than</label> -->
+        <select class="form-control" name="minAmount" id="filters-input">
+          <option value="0">0</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+      <div class="form-fields">
+        <!-- <label for="filters-input">Greater Than</label> -->
+        <select class="form-control" name="year" id="years-input"> </select>
+      </div>
+      <button type="submit" class="form-submit">Submit</button>
+    </form>
+
+    <div id="chart-container"></div>
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+    <script src="/Chart.bundle.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+
+    <script type="module" src="chart.js"></script>
+    <script type="module" src="config.js"></script>
+    <script type="module" src="data.js"></script>
+    <script type="module" src="util.js"></script>
+    <script type="module" src="colors.js"></script>
+    <script type="module">
+      import { createChart } from './chart.js'
+      import rainData from './data.js'
+      import {
+        populateDistrictDropDown,
+        populateYearDropDown,
+        filterDataByDistrict,
+        filterDataByYear,
+        filterPipeLine
+      } from './util.js'
+
+      const formattedData = rainData.data.map(districtData => ({
+        district: districtData[0],
+        rain: {
+          '2011': districtData[2],
+          '2012': districtData[4],
+          '2013': districtData[6],
+          '2014': districtData[8]
+        }
+      }))
+
+      populateDistrictDropDown('#district-input', formattedData)
+      populateYearDropDown('#years-input', formattedData)
+
+      const form = document.querySelector('.form')
+      form.addEventListener('submit', event => {
+        event.preventDefault()
+        const { chart, minAmount, chartLib, district, year } = event.target
+
+        const filteredData = filterPipeLine(
+          filterDataByDistrict(district.value),
+          filterDataByYear(year.value)
+        )(formattedData)
+        // console.log(filteredData)
+        const options = {
+          chartType: chart.value,
+          min: parseInt(minAmount.value),
+          container: 'chart-container',
+          chartLib: chartLib.value,
+          data: filteredData
+        }
+        createChart(options)
+      })
+    </script>
+  </body>
+</html>

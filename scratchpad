@@ -1,0 +1,5 @@
+ {
+          label: `rain level in ${data[0].district}`,
+          data: Object.values(data[0].rain),
+          borderWidth: 1
+}
