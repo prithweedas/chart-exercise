@@ -76,7 +76,7 @@
     <script type="module" src="colors.js"></script>
     <script type="module">
       import { createChart } from './chart.js'
-      import rainData from './data.js'
+      // import rainData from './data.js'
       import {
         populateDistrictDropDown,
         populateYearDropDown,
@@ -85,38 +85,39 @@
         filterPipeLine
       } from './util.js'
 
-      const formattedData = rainData.data.map(districtData => ({
-        district: districtData[0],
-        rain: {
-          '2011': districtData[2],
-          '2012': districtData[4],
-          '2013': districtData[6],
-          '2014': districtData[8]
-        }
-      }))
-
-      populateDistrictDropDown('#district-input', formattedData)
-      populateYearDropDown('#years-input', formattedData)
-
       const form = document.querySelector('.form')
-      form.addEventListener('submit', event => {
-        event.preventDefault()
-        const { chart, minAmount, chartLib, district, year } = event.target
 
-        const filteredData = filterPipeLine(
-          filterDataByDistrict(district.value),
-          filterDataByYear(year.value)
-        )(formattedData)
-        // console.log(filteredData)
-        const options = {
-          chartType: chart.value,
-          min: parseInt(minAmount.value),
-          container: 'chart-container',
-          chartLib: chartLib.value,
-          data: filteredData
+      async function startApp() {
+        try {
+          const { data } = await fetch(
+            'https://test.thinkanalytics.in:7777/api/rain'
+          ).then(res => res.json())
+          populateDistrictDropDown('#district-input', data)
+          populateYearDropDown('#years-input', data)
+          form.addEventListener('submit', event => {
+            event.preventDefault()
+            const { chart, minAmount, chartLib, district, year } = event.target
+
+            const filteredData = filterPipeLine(
+              filterDataByDistrict(district.value),
+              filterDataByYear(year.value)
+            )(data)
+            // console.log(filteredData)
+            const options = {
+              chartType: chart.value,
+              min: parseInt(minAmount.value),
+              container: 'chart-container',
+              chartLib: chartLib.value,
+              data: filteredData
+            }
+            createChart(options)
+          })
+        } catch (error) {
+          console.log(error)
         }
-        createChart(options)
-      })
+      }
+
+      startApp()
     </script>
   </body>
 </html>
